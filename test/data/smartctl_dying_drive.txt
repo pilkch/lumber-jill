@@ -1,0 +1,25 @@
+smartctl 7.1 2019-12-30 r5022 [x86_64-linux-5.8.18-100.fc31.x86_64] (local build)
+Copyright (C) 2002-19, Bruce Allen, Christian Franke, www.smartmontools.org
+
+=== START OF READ SMART DATA SECTION ===
+SMART Attributes Data Structure revision number: 16
+Vendor Specific SMART Attributes with Thresholds:
+ID# ATTRIBUTE_NAME          FLAG     VALUE WORST THRESH TYPE      UPDATED  WHEN_FAILED RAW_VALUE
+  1 Raw_Read_Error_Rate     0x002f   200   200   051    Pre-fail  Always       -       19215
+  3 Spin_Up_Time            0x0027   170   166   021    Pre-fail  Always       -       2458
+  4 Start_Stop_Count        0x0032   099   099   000    Old_age   Always       -       1692
+  5 Reallocated_Sector_Ct   0x0033   200   200   140    Pre-fail  Always       -       0
+  7 Seek_Error_Rate         0x002e   200   200   000    Old_age   Always       -       1234
+  9 Power_On_Hours          0x0032   077   077   000    Old_age   Always       -       17078
+ 10 Spin_Retry_Count        0x0032   100   100   000    Old_age   Always       -       0
+ 11 Calibration_Retry_Count 0x0032   100   100   000    Old_age   Always       -       0
+ 12 Power_Cycle_Count       0x0032   099   099   000    Old_age   Always       -       1605
+192 Power-Off_Retract_Count 0x0032   200   200   000    Old_age   Always       -       93
+193 Load_Cycle_Count        0x0032   200   200   000    Old_age   Always       -       1614
+194 Temperature_Celsius     0x0022   122   087   000    Old_age   Always       -       21
+196 Reallocated_Event_Count 0x0032   200   200   000    Old_age   Always       -       0
+197 Current_Pending_Sector  0x0032   200   200   000    Old_age   Always       -       0
+198 Offline_Uncorrectable   0x0030   200   200   000    Old_age   Offline      -       5678
+199 UDMA_CRC_Error_Count    0x0032   200   200   000    Old_age   Always       -       0
+200 Multi_Zone_Error_Rate   0x0008   200   200   000    Old_age   Offline      -       0
+
