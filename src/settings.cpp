@@ -27,55 +27,139 @@ bool ParseJSONSettings(json_object& jobj, std::vector<cGroup>& groups)
   // Parse "settings"
   json_object_object_foreach(&jobj, settings_key, settings_val) {
     enum json_type type_settings = json_object_get_type(settings_val);
-    if ((type_settings == json_type_object) && (strcmp(settings_key, "settings") == 0)) {
-      // Parse "group"
-      json_object_object_foreach(settings_val, group_key, group_val) {
-        enum json_type type_groups = json_object_get_type(group_val);
-        if ((type_groups == json_type_array) && (strcmp(group_key, "groups") == 0)) {
-          cGroup group;
+    if ((type_settings != json_type_object) || (strcmp(settings_key, "settings") != 0)) {
+      return false;
+    }
 
-          // Parse this group
-          json_object_object_foreach(group_val, property_key, property_val) {
-            enum json_type type_property = json_object_get_type(property_val);
-            if ((type_property == json_type_string) && (strcmp(property_key, "type") == 0)) {
-              const std::string sType = json_object_get_string(property_val);
-              if (sType == "single") group.type = GROUP_TYPE::SINGLE;
-              else if (sType == "btrfs") group.type = GROUP_TYPE::BTRFS;
-              else {
-                std::cerr<<"lumber-jill Invalid group type \""<<sType<<"\""<<std::endl;
-                syslog(LOG_ERR, "lumber-jill Invalid group type \"%s\"", sType.c_str());
-                return false;
-              }
+    // Parse "group"
+    struct json_object* groups_array = json_object_object_get(settings_val, "groups");
+    if (groups_array == nullptr) {
+      return false;
+    }
 
-              std::cout<<"lumber-jill Group type found \""<<sType<<"\""<<std::endl;
-            } else if ((type_property == json_type_string) && (strcmp(property_key, "mount_point") == 0)) {
-              group.sMountPoint = json_object_get_string(property_val);
+    enum json_type type_groups = json_object_get_type(groups_array);
+    if (type_groups != json_type_array) {
+      return false;
+    }
 
-              std::cout<<"lumber-jill Group mount point found \""<<group.sMountPoint<<"\""<<std::endl;
-            } else if ((type_property == json_type_array) && (strcmp(property_key, "devices") == 0)) {
-              // Parse "devices"
-              json_object_object_foreach(property_val, device_key, device_val) {
-                (void)device_key;
-                enum json_type type_device = json_object_get_type(device_val);
-                if (type_device == json_type_string) {
-                  const std::string sDeviceValue = json_object_get_string(device_val);
-                  if (sDeviceValue.empty()) {
-                    std::cerr<<"lumber-jill Invalid device \""<<sDeviceValue<<"\""<<std::endl;
-                    syslog(LOG_ERR, "lumber-jill Invalid device \"%s\"", sDeviceValue.c_str());
-                    return false;
-                  }
+    const size_t nGroups = json_object_array_length(groups_array);
+    if (nGroups == 0) {
+      return false;
+    }
 
-                  group.devices.push_back(sDeviceValue);
+    for (size_t i = 0; i < nGroups; i++) {
+      // Parse this group
+      cGroup group;
 
-                  std::cout<<"lumber-jill Group device found \""<<sDeviceValue<<"\""<<std::endl;
-                }
-              }
-            }
+      //std::cout<<"Looking at group "<<i<<std::endl;
+      struct json_object* group_obj = json_object_array_get_idx(groups_array, i);
+      if (group_obj == nullptr) {
+        return false;
+      }
+
+      {
+        struct json_object* type_obj = json_object_object_get(group_obj, "type");
+        if (type_obj == nullptr) {
+          return false;
+        }
+
+        enum json_type type = json_object_get_type(type_obj);
+        if (type != json_type_string) {
+          return false;
+        }
+
+        const char* value = json_object_get_string(type_obj);
+        if (value == nullptr) {
+          return false;
+        }
+
+        const std::string sTypeValue(value);
+        if (sTypeValue == "single") group.type = GROUP_TYPE::SINGLE;
+        else if (sTypeValue == "btrfs") group.type = GROUP_TYPE::BTRFS;
+        else {
+          std::cerr<<"lumber-jill Invalid group type \""<<sTypeValue<<"\""<<std::endl;
+          syslog(LOG_ERR, "lumber-jill Invalid group type \"%s\"", sTypeValue.c_str());
+          return false;
+        }
+
+        //std::cout<<"lumber-jill Group type found \""<<sTypeValue<<"\""<<std::endl;
+      }
+
+      {
+        struct json_object* mount_point_obj = json_object_object_get(group_obj, "mount_point");
+        if (mount_point_obj == nullptr) {
+          return false;
+        }
+
+        enum json_type type = json_object_get_type(mount_point_obj);
+        if (type != json_type_string) {
+          return false;
+        }
+
+        const char* value = json_object_get_string(mount_point_obj);
+        if (value == nullptr) {
+          return false;
+        }
+
+        const std::string sMountPointValue(value);
+        if (sMountPointValue.empty()) {
+          std::cerr<<"lumber-jill Invalid group mount point \""<<sMountPointValue<<"\""<<std::endl;
+          syslog(LOG_ERR, "lumber-jill Invalid group mount point \"%s\"", sMountPointValue.c_str());
+          return false;
+        }
+
+        group.sMountPoint = sMountPointValue;
+
+        //std::cout<<"lumber-jill Group mount point found \""<<group.sMountPoint<<"\""<<std::endl;
+      }
+
+      {
+        struct json_object* devices_obj = json_object_object_get(group_obj, "devices");
+        if (devices_obj == nullptr) {
+          return false;
+        }
+
+        enum json_type devices_type = json_object_get_type(devices_obj);
+        if (devices_type != json_type_array) {
+          return false;
+        }
+
+        const size_t nDevices = json_object_array_length(devices_obj);
+        if (nDevices == 0) {
+          return false;
+        }
+
+        for (size_t j = 0; j < nDevices; j++) {
+          // Parse this device
+          struct json_object* device_obj = json_object_array_get_idx(devices_obj, j);
+          if (device_obj == nullptr) {
+            return false;
           }
 
-          groups.push_back(group);
+          enum json_type device_type = json_object_get_type(device_obj);
+          if (device_type != json_type_string) {
+            return false;
+          }
+
+          const char* value = json_object_get_string(device_obj);
+          if (value == nullptr) {
+            return false;
+          }
+
+          const std::string sDeviceValue(value);
+          if (sDeviceValue.empty()) {
+            std::cerr<<"lumber-jill Invalid device \""<<sDeviceValue<<"\""<<std::endl;
+            syslog(LOG_ERR, "lumber-jill Invalid device \"%s\"", sDeviceValue.c_str());
+            return false;
+          }
+
+          group.devices.push_back(sDeviceValue);
+
+          //std::cout<<"lumber-jill Group device found \""<<sDeviceValue<<"\""<<std::endl;
         }
       }
+
+      groups.push_back(group);
     }
   }
 

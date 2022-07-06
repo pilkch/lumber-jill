@@ -51,7 +51,7 @@ INCLUDE_DIRECTORIES(include)
 
 
 # Source files
-SET(SOURCE_FILES_COMMON src/btrfs.cpp src/run_command.cpp src/settings.cpp src/smartctl.cpp src/utils.cpp)
+SET(SOURCE_FILES_COMMON src/btrfs.cpp src/run_command.cpp src/settings.cpp src/smartctl.cpp src/stats.cpp src/utils.cpp)
 
 SET(SOURCE_FILES src/main.cpp ${SOURCE_FILES_COMMON})
 
@@ -101,7 +101,7 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBRARIES_LINKED})
 
 
 # Unit test
-SET(SOURCE_FILES_UNITTEST ${SOURCE_FILES_COMMON} test/src/main.cpp test/src/parse_command_output_unittest.cpp test/src/run_command_unittest.cpp)
+SET(SOURCE_FILES_UNITTEST ${SOURCE_FILES_COMMON} test/src/main.cpp test/src/load_settings_unittest.cpp test/src/stats_to_json_unittest.cpp test/src/parse_command_output_unittest.cpp test/src/run_command_unittest.cpp)
 
 SET(LIBRARIES_LINKED_UNITTEST
   ${LIBRARIES_LINKED}

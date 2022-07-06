@@ -88,32 +88,30 @@ bool QueryAndLogGroups(const cSettings& settings)
 {
   for (auto& group : settings.GetGroups()) {
     // Get mount usage stats
-    cMountStats ms;
-    GetMountTotalAndFreeSpace(group.sMountPoint, ms);
+    cMountStats mountStats;
+    GetMountTotalAndFreeSpace(group.sMountPoint, mountStats);
 
     // Now check each drive
-    std::vector<cDriveStats> driveStats;
     for (auto& sDevicePath : group.devices) {
-      cDriveStats ds;
-      ds.bIsPresent = IsDrivePresent(sDevicePath);
+      cDriveStats deviceStats;
+      deviceStats.bIsPresent = IsDrivePresent(sDevicePath);
 
-      smartctl::GetDriveSmartControlData(sDevicePath, ds.smartCtlStats);
+      smartctl::GetDriveSmartControlData(sDevicePath, deviceStats.smartCtlStats);
 
-      driveStats.push_back(ds);
+      mountStats.mapDrivePathToDriveStats[sDevicePath] = deviceStats;
     }
 
-    std::vector<std::string> drivePaths;
-    for (auto& path : group.devices) {
-      drivePaths.push_back(path);
-    }
-
-    cBtrfsVolumeStats btrfsStats;
-
+    // Log output
     if (group.type == GROUP_TYPE::BTRFS) {
-      btrfs::GetBtrfsVolumeDeviceStats(group.sMountPoint, drivePaths, btrfsStats);
-    }
+      // For BTRFS mounts we can print out additional stats
+      cBtrfsVolumeStats btrfsVolumeStats;
+      btrfs::GetBtrfsVolumeDeviceStats(group.sMountPoint, group.devices, btrfsVolumeStats);
 
-    // TODO: Log stats
+      // Log BTRFS output
+      LogStatsToSyslogMountStatsAndBtrfsStats(mountStats, btrfsVolumeStats);
+    } else {
+      LogStatsToSyslogMountStats(mountStats);
+    }
   }
 
   return true;

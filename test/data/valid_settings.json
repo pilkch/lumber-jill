@@ -1,0 +1,31 @@
+{
+  "settings": {
+    "groups": [
+      {
+        "type": "single",
+        "mount_point": "/",
+        "devices": [
+          "/dev/sda",
+        ]
+      },
+      {
+        "type": "single",
+        "mount_point": "/mnt/externalusb",
+        "devices": [
+          "/dev/sdg"
+        ]
+      },
+      {
+        "type": "btrfs",
+        "mount_point": "/data1",
+        "devices": [
+          "/dev/sdb",
+          "/dev/sdc",
+          "/dev/sdd",
+          "/dev/sde",
+          "/dev/sdf"
+        ]
+      }
+    ]
+  }
+}

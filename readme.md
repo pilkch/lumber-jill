@@ -22,12 +22,13 @@ sudo dnf install gcc-c++ cmake json-c-devel
 
 Build:
 ```bash
+cmake .
 make
 ```
 
 Install it:
 ```bash
-sudo make install
+sudo cp lumber-jill /usr/bin/lumber-jill
 ```
 
 Create the output directory (You can change this, but you'll need to use a JSON settings file and specify where it goes):
@@ -72,7 +73,7 @@ crontab -r
 
 Remove binary and settings file:
 ```bash
-sudo make uninstall
+sudo rm /usr/bin/lumber-jill /root/.config/lumber-jill/settings.json
 ```
 
 ## Rational

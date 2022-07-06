@@ -29,8 +29,12 @@ class cMountStats {
 public:
   cMountStats() : nFreeBytes(0), nTotalBytes(0) {}
 
+  std::string sMountPoint;
+
   size_t nFreeBytes;
   size_t nTotalBytes;
+
+  std::map<std::string, cDriveStats> mapDrivePathToDriveStats;
 };
 
 
@@ -43,7 +47,6 @@ public:
   size_t nFlush_io_errs;
   size_t nCorruption_errs;
   size_t nGeneration_errs;
-
 };
 
 class cBtrfsVolumeStats {
@@ -51,4 +54,12 @@ public:
   std::map<std::string, cBtrfsDriveStats> mapDrivePathToBtrfsDriveStats;
 };
 
+
+
+std::string GetJSONMountStats(const cMountStats& mountStats);
+std::string GetJSONBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats);
+
+void LogStatsToSyslogMountStats(const cMountStats& mountStats);
+void LogStatsToSyslogMountStatsAndBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats);
+  
 }

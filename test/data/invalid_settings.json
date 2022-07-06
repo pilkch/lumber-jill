@@ -1,0 +1,26 @@
+{
+  "settings": {
+    "groups": [
+      {
+        "type": "single",
+        "mount_point": "/",
+      },
+      {
+        "type": "single",
+        "devices": [
+          "/dev/sdg"
+        ]
+      },
+      {
+        "mount_point": "/data1",
+        "devices": [
+          "/dev/sdb",
+          "/dev/sdc",
+          "/dev/sdd",
+          "/dev/sde",
+          "/dev/sdf"
+        ]
+      }
+    ]
+  }
+}

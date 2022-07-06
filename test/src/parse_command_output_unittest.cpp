@@ -43,7 +43,7 @@ TEST(ParseCommand, TestParseBtrfsOutput)
     EXPECT_EQ(0, btrfsVolumeStats.mapDrivePathToBtrfsDriveStats.size());
   }
 
-  // Test against actual output from smartctl
+  // Test against actual output from btrfs
   {
     const size_t nMaxFileSizeBytes = 100000;
 
