@@ -102,14 +102,15 @@ void LogStatsToSyslogMountStats(const cMountStats& mountStats)
     return;
   }
 
-  syslog(LOG_INFO, "Mount %s drive stats json %s", mountStats.sMountPoint.c_str(), json_output_single_line.c_str());
+  syslog(LOG_INFO, "Mount %s drive stats json @cee: %s", mountStats.sMountPoint.c_str(), json_output_single_line.c_str());
 }
 
 void LogStatsToSyslogMountStatsAndBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats)
 {
+  // Log the regular mount stats
   LogStatsToSyslogMountStats(mountStats);
 
-
+  // Now log the BTRFS stats
   const std::string json_output_single_line = GetJSONBtrfsStats(mountStats, btrfsVolumeStats);
 
   std::cout<<"Json output: "<<json_output_single_line<<std::endl;
@@ -119,7 +120,7 @@ void LogStatsToSyslogMountStatsAndBtrfsStats(const cMountStats& mountStats, cons
     return;
   }
 
-  syslog(LOG_INFO, "Mount %s btrfs stats json %s", mountStats.sMountPoint.c_str(), json_output_single_line.c_str());
+  syslog(LOG_INFO, "Mount %s btrfs stats json @cee: %s", mountStats.sMountPoint.c_str(), json_output_single_line.c_str());
 }
 
 }
