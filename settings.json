@@ -5,7 +5,7 @@
         "type": "single",
         "mount_point": "/",
         "devices": [
-          "/dev/sda",
+          "/dev/sda"
         ]
       },
       {
