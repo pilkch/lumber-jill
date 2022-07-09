@@ -121,7 +121,7 @@ bool GetBtrfsVolumeDeviceStats(const std::string& sMountPoint, const std::vector
   // Run "btrfs device stats /data1"
   std::string out_standard;
   std::string out_error;
-  const bool result = RunCommand("/usr/bin/btrfs", std::vector<std::string> { "device", "stats", sMountPoint }, out_standard, out_error);
+  const bool result = RunCommand("/usr/sbin/btrfs", std::vector<std::string> { "device", "stats", sMountPoint }, out_standard, out_error);
   if (!result) {
     return false;
   }
