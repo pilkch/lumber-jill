@@ -1,17 +1,23 @@
 #pragma once
 
 #include <map>
+#include <optional>
 #include <string>
 
 namespace lumberjill {
 
 class cSmartCtlStats {
 public:
-  cSmartCtlStats() : nSmart_Raw_Read_Error_Rate(0), nSmart_Seek_Error_Rate(0), nSmart_Offline_Uncorrectable(0) {}
+  void Clear()
+  {
+    nRaw_Read_Error_Rate.reset();
+    nSeek_Error_Rate.reset();
+    nOffline_Uncorrectable.reset();
+  }
 
-  size_t nSmart_Raw_Read_Error_Rate;
-  size_t nSmart_Seek_Error_Rate;
-  size_t nSmart_Offline_Uncorrectable;
+  std::optional<size_t> nRaw_Read_Error_Rate;
+  std::optional<size_t> nSeek_Error_Rate;
+  std::optional<size_t> nOffline_Uncorrectable;
 };
 
 class cDriveStats {
@@ -29,10 +35,16 @@ class cMountStats {
 public:
   cMountStats() : nFreeBytes(0), nTotalBytes(0) {}
 
+  void ClearSpaceStats()
+  {
+    nFreeBytes.reset();
+    nTotalBytes.reset();
+  }
+
   std::string sMountPoint;
 
-  size_t nFreeBytes;
-  size_t nTotalBytes;
+  std::optional<size_t> nFreeBytes;
+  std::optional<size_t> nTotalBytes;
 
   std::map<std::string, cDriveStats> mapDrivePathToDriveStats;
 };
@@ -40,13 +52,20 @@ public:
 
 class cBtrfsDriveStats {
 public:
-  cBtrfsDriveStats() : nWrite_io_errs(0), nRead_io_errs(0), nFlush_io_errs(0), nCorruption_errs(0), nGeneration_errs(0) {}
+  void Clear()
+  {
+    nWrite_io_errs.reset();
+    nRead_io_errs.reset();
+    nFlush_io_errs.reset();
+    nCorruption_errs.reset();
+    nGeneration_errs.reset();
+  }
 
-  size_t nWrite_io_errs;
-  size_t nRead_io_errs;
-  size_t nFlush_io_errs;
-  size_t nCorruption_errs;
-  size_t nGeneration_errs;
+  std::optional<size_t> nWrite_io_errs;
+  std::optional<size_t> nRead_io_errs;
+  std::optional<size_t> nFlush_io_errs;
+  std::optional<size_t> nCorruption_errs;
+  std::optional<size_t> nGeneration_errs;
 };
 
 class cBtrfsVolumeStats {
@@ -59,7 +78,7 @@ public:
 std::string GetJSONMountStats(const cMountStats& mountStats);
 std::string GetJSONBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats);
 
-void LogStatsToSyslogMountStats(const cMountStats& mountStats);
-void LogStatsToSyslogMountStatsAndBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats);
-  
+bool LogStatsToSyslogMountStats(const cMountStats& mountStats);
+bool LogStatsToSyslogMountStatsAndBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats);
+
 }

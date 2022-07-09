@@ -86,9 +86,12 @@ bool IsDrivePresent(const std::string& sDevicePath)
 
 bool QueryAndLogGroups(const cSettings& settings)
 {
+  bool result = true;
+
   for (auto& group : settings.GetGroups()) {
     // Get mount usage stats
     cMountStats mountStats;
+    mountStats.sMountPoint = group.sMountPoint;
     GetMountTotalAndFreeSpace(group.sMountPoint, mountStats);
 
     // Now check each drive
@@ -108,13 +111,15 @@ bool QueryAndLogGroups(const cSettings& settings)
       btrfs::GetBtrfsVolumeDeviceStats(group.sMountPoint, group.devices, btrfsVolumeStats);
 
       // Log BTRFS output
-      LogStatsToSyslogMountStatsAndBtrfsStats(mountStats, btrfsVolumeStats);
-    } else {
-      LogStatsToSyslogMountStats(mountStats);
+      if (!LogStatsToSyslogMountStatsAndBtrfsStats(mountStats, btrfsVolumeStats)) {
+        result = false;
+      }
+    } else if (!LogStatsToSyslogMountStats(mountStats)) {
+      result = false;
     }
   }
 
-  return true;
+  return result;
 }
 
 }

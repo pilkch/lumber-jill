@@ -57,9 +57,9 @@ TEST(StatsToJSON, TestJSONBtrfsStats)
     lumberjill::cDriveStats driveStats;
     driveStats.bIsPresent = true;
 
-    driveStats.smartCtlStats.nSmart_Raw_Read_Error_Rate = 0;
-    driveStats.smartCtlStats.nSmart_Seek_Error_Rate = 0;
-    driveStats.smartCtlStats.nSmart_Offline_Uncorrectable = 0;
+    driveStats.smartCtlStats.nRaw_Read_Error_Rate = 0;
+    driveStats.smartCtlStats.nSeek_Error_Rate = 0;
+    driveStats.smartCtlStats.nOffline_Uncorrectable = 0;
 
     mountStats.mapDrivePathToDriveStats["/dev/sdb"] = driveStats;
     mountStats.mapDrivePathToDriveStats["/dev/sdc"] = driveStats;
@@ -71,9 +71,9 @@ TEST(StatsToJSON, TestJSONBtrfsStats)
     lumberjill::cDriveStats driveStats;
     driveStats.bIsPresent = false;
 
-    driveStats.smartCtlStats.nSmart_Raw_Read_Error_Rate = 0;
-    driveStats.smartCtlStats.nSmart_Seek_Error_Rate = 0;
-    driveStats.smartCtlStats.nSmart_Offline_Uncorrectable = 0;
+    driveStats.smartCtlStats.nRaw_Read_Error_Rate = 0;
+    driveStats.smartCtlStats.nSeek_Error_Rate = 0;
+    driveStats.smartCtlStats.nOffline_Uncorrectable = 0;
 
     mountStats.mapDrivePathToDriveStats["/dev/sde"] = driveStats;
   }

@@ -46,20 +46,6 @@ bool ParseBtrfsVolumeDeviceStats(std::string_view view, const std::vector<std::s
     return false;
   }
 
-  // These are just flags to say whether we parse the values for each drive
-  class cParsedStatus {
-  public:
-    cParsedStatus() : parsed_write_io_errs(false), parsed_read_io_errs(false), parsed_flush_io_errs(false), parsed_corruption_errs(false), parsed_generation_errs(false) {}
-
-    bool parsed_write_io_errs;
-    bool parsed_read_io_errs;
-    bool parsed_flush_io_errs;
-    bool parsed_corruption_errs;
-    bool parsed_generation_errs;
-  };
-
-  std::map<std::string, cParsedStatus> mapDevicePathToParsedStatus;
-
   while (!view.empty()) {
     //std::cout<<"Looking at \""<<view<<"\""<<std::endl;
 
@@ -101,19 +87,14 @@ bool ParseBtrfsVolumeDeviceStats(std::string_view view, const std::vector<std::s
                       const std::string sPath(path.data(), path.length());
 
                       if (property == "write_io_errs") {
-                        mapDevicePathToParsedStatus[sPath].parsed_write_io_errs = true;
                         btrfsVolumeStats.mapDrivePathToBtrfsDriveStats[sPath].nWrite_io_errs = value;
                       } else if (property == "read_io_errs") {
-                        mapDevicePathToParsedStatus[sPath].parsed_read_io_errs = true;
                         btrfsVolumeStats.mapDrivePathToBtrfsDriveStats[sPath].nRead_io_errs = value;
                       } else if (property == "flush_io_errs") {
-                        mapDevicePathToParsedStatus[sPath].parsed_flush_io_errs = true;
                         btrfsVolumeStats.mapDrivePathToBtrfsDriveStats[sPath].nFlush_io_errs = value;
                       } else if (property == "corruption_errs") {
-                        mapDevicePathToParsedStatus[sPath].parsed_corruption_errs = true;
                         btrfsVolumeStats.mapDrivePathToBtrfsDriveStats[sPath].nCorruption_errs = value;
                       } else if (property == "generation_errs") {
-                        mapDevicePathToParsedStatus[sPath].parsed_generation_errs = true;
                         btrfsVolumeStats.mapDrivePathToBtrfsDriveStats[sPath].nGeneration_errs = value;
                       }
                     }
@@ -128,19 +109,6 @@ bool ParseBtrfsVolumeDeviceStats(std::string_view view, const std::vector<std::s
 
     view.remove_prefix(new_line + 1);
   }
-
-  // Validate that we parsed every value for every drive
-  for (auto& path : drivePaths) {
-    if (
-      !mapDevicePathToParsedStatus[path].parsed_write_io_errs ||
-      !mapDevicePathToParsedStatus[path].parsed_read_io_errs ||
-      !mapDevicePathToParsedStatus[path].parsed_flush_io_errs ||
-      !mapDevicePathToParsedStatus[path].parsed_corruption_errs ||
-      !mapDevicePathToParsedStatus[path].parsed_generation_errs
-    ) {
-      return false;
-    }
-  };
 
   return true;
 }

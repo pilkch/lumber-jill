@@ -44,17 +44,15 @@ bool ParseSmartCtlRawValue(std::string_view line, size_t& value)
 
 bool ParseDriveSmartControlData(std::string_view view, cSmartCtlStats& smartctlStats)
 {
-  smartctlStats.nSmart_Raw_Read_Error_Rate = 0;
-  smartctlStats.nSmart_Seek_Error_Rate = 0;
-  smartctlStats.nSmart_Offline_Uncorrectable = 0;
+  smartctlStats.Clear();
+
+  if (view.empty()) {
+    return false;
+  }
 
   // TODO: VALUE, WORST, THRESH are actually counting down where 0 is bad, high numbers are generally good. Should we only look at RAW_VALUE instead? Maybe just log and graph it over time?
 
   // Lazy parsing, we just look for the name of the field we are looking for in each line, then just get the raw value from the end
-
-  bool parsed_raw_read_error_rate = false;
-  bool parsed_seek_error_rate = false;
-  bool parsed_offline_uncorrectable = false;
 
   while (!view.empty()) {
     //std::cout<<"Looking at \""<<view<<"\""<<std::endl;
@@ -72,21 +70,18 @@ bool ParseDriveSmartControlData(std::string_view view, cSmartCtlStats& smartctlS
 
       if (line.find("Raw_Read_Error_Rate") != std::string_view::npos) {
         if (ParseSmartCtlRawValue(line, value)) {
-          smartctlStats.nSmart_Raw_Read_Error_Rate = value;
-          //std::cout<<"nSmart_Raw_Read_Error_Rate: "<<smartctlStats.nSmart_Raw_Read_Error_Rate<<std::endl;
-          parsed_raw_read_error_rate = true;
+          smartctlStats.nRaw_Read_Error_Rate = value;
+          //std::cout<<"nRaw_Read_Error_Rate: "<<smartctlStats.nRaw_Read_Error_Rate.value()<<std::endl;
         }
       } else if (line.find("Seek_Error_Rate") != std::string_view::npos) {
         if (ParseSmartCtlRawValue(line, value)) {
-          smartctlStats.nSmart_Seek_Error_Rate = value;
-          //std::cout<<"nSmart_Seek_Error_Rate: "<<smartctlStats.nSmart_Seek_Error_Rate<<std::endl;
-          parsed_seek_error_rate = true;
+          smartctlStats.nSeek_Error_Rate = value;
+          //std::cout<<"nSeek_Error_Rate: "<<smartctlStats.nSeek_Error_Rate.value()<<std::endl;
         }
       } else if (line.find("Offline_Uncorrectable") != std::string_view::npos) {
         if (ParseSmartCtlRawValue(line, value)) {
-          smartctlStats.nSmart_Offline_Uncorrectable = value;
-          //std::cout<<"nSmart_Offline_Uncorrectable: "<<smartctlStats.nSmart_Offline_Uncorrectable<<std::endl;
-          parsed_offline_uncorrectable = true;
+          smartctlStats.nOffline_Uncorrectable = value;
+          //std::cout<<"nOffline_Uncorrectable: "<<smartctlStats.nOffline_Uncorrectable.value()<<std::endl;
         }
       }
     }
@@ -94,14 +89,12 @@ bool ParseDriveSmartControlData(std::string_view view, cSmartCtlStats& smartctlS
     view.remove_prefix(new_line + 1);
   }
 
-  return (parsed_raw_read_error_rate && parsed_seek_error_rate && parsed_offline_uncorrectable);
+  return true;
 }
 
 bool GetDriveSmartControlData(const std::string& sDevicePath, cSmartCtlStats& smartctlStats)
 {
-  smartctlStats.nSmart_Raw_Read_Error_Rate = 0;
-  smartctlStats.nSmart_Seek_Error_Rate = 0;
-  smartctlStats.nSmart_Offline_Uncorrectable = 0;
+  smartctlStats.Clear();
 
   // Run "smartctl -A /dev/sdf"
   std::string out_standard;

@@ -24,13 +24,21 @@ namespace lumberjill {
 
 std::string GetJSONMountStats(const cMountStats& mountStats)
 {
+  if (mountStats.sMountPoint.empty()) {
+    return "";
+  }
+
   json_object* root = json_object_new_object();
   if (root == nullptr) return "";
 
   // Information
   json_object_object_add(root, "mountPoint", json_object_new_string(mountStats.sMountPoint.c_str()));
-  json_object_object_add(root, "freeSpaceGB", json_object_new_int(SizeTToInt32(BytesToGB(mountStats.nFreeBytes))));
-  json_object_object_add(root, "totalSpaceGB", json_object_new_int(SizeTToInt32(BytesToGB(mountStats.nTotalBytes))));
+  if (mountStats.nFreeBytes.has_value()) {
+    json_object_object_add(root, "freeSpaceGB", json_object_new_int(SizeTToInt32(BytesToGB(mountStats.nFreeBytes.value()))));
+  }
+  if (mountStats.nTotalBytes.has_value()) {
+    json_object_object_add(root, "totalSpaceGB", json_object_new_int(SizeTToInt32(BytesToGB(mountStats.nTotalBytes.value()))));
+  }
 
   json_object* children = json_object_new_array();
 
@@ -38,10 +46,16 @@ std::string GetJSONMountStats(const cMountStats& mountStats)
     json_object* drive = json_object_new_object();
     json_object_object_add(drive, "device", json_object_new_string(item.first.c_str()));
     json_object_object_add(drive, "present", json_object_new_boolean(item.second.bIsPresent));
-    
-    json_object_object_add(drive, "smartRaw_Read_Error_Rate", json_object_new_int(SizeTToInt32(item.second.smartCtlStats.nSmart_Raw_Read_Error_Rate)));
-    json_object_object_add(drive, "smartSeek_Error_Rate", json_object_new_int(SizeTToInt32(item.second.smartCtlStats.nSmart_Seek_Error_Rate)));
-    json_object_object_add(drive, "smartOffline_Uncorrectable", json_object_new_int(SizeTToInt32(item.second.smartCtlStats.nSmart_Offline_Uncorrectable)));
+
+    if (item.second.smartCtlStats.nRaw_Read_Error_Rate.has_value()) {
+      json_object_object_add(drive, "smartRaw_Read_Error_Rate", json_object_new_int(SizeTToInt32(item.second.smartCtlStats.nRaw_Read_Error_Rate.value())));
+    }
+    if (item.second.smartCtlStats.nSeek_Error_Rate.has_value()) {
+      json_object_object_add(drive, "smartSeek_Error_Rate", json_object_new_int(SizeTToInt32(item.second.smartCtlStats.nSeek_Error_Rate.value())));
+    }
+    if (item.second.smartCtlStats.nOffline_Uncorrectable.has_value()) {
+      json_object_object_add(drive, "smartOffline_Uncorrectable", json_object_new_int(SizeTToInt32(item.second.smartCtlStats.nOffline_Uncorrectable.value())));
+    }
 
     json_object_array_add(children, drive);
   }
@@ -59,6 +73,10 @@ std::string GetJSONMountStats(const cMountStats& mountStats)
 
 std::string GetJSONBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats)
 {
+  if (mountStats.sMountPoint.empty()) {
+    return "";
+  }
+
   json_object* root = json_object_new_object();
   if (root == nullptr) return "";
 
@@ -70,12 +88,22 @@ std::string GetJSONBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeS
   for (auto& item : btrfsVolumeStats.mapDrivePathToBtrfsDriveStats) {
     json_object* drive = json_object_new_object();
     json_object_object_add(drive, "device", json_object_new_string(item.first.c_str()));
-    
-    json_object_object_add(drive, "write_io_errs", json_object_new_int(SizeTToInt32(item.second.nWrite_io_errs)));
-    json_object_object_add(drive, "read_io_errs", json_object_new_int(SizeTToInt32(item.second.nRead_io_errs)));
-    json_object_object_add(drive, "flush_io_errs", json_object_new_int(SizeTToInt32(item.second.nFlush_io_errs)));
-    json_object_object_add(drive, "corruption_errs", json_object_new_int(SizeTToInt32(item.second.nCorruption_errs)));
-    json_object_object_add(drive, "generation_errs", json_object_new_int(SizeTToInt32(item.second.nGeneration_errs)));
+
+    if (item.second.nWrite_io_errs.has_value()) {
+      json_object_object_add(drive, "write_io_errs", json_object_new_int(SizeTToInt32(item.second.nWrite_io_errs.value())));
+    }
+    if (item.second.nRead_io_errs.has_value()) {
+      json_object_object_add(drive, "read_io_errs", json_object_new_int(SizeTToInt32(item.second.nRead_io_errs.value())));
+    }
+    if (item.second.nFlush_io_errs.has_value()) {
+      json_object_object_add(drive, "flush_io_errs", json_object_new_int(SizeTToInt32(item.second.nFlush_io_errs.value())));
+    }
+    if (item.second.nCorruption_errs.has_value()) {
+      json_object_object_add(drive, "corruption_errs", json_object_new_int(SizeTToInt32(item.second.nCorruption_errs.value())));
+    }
+    if (item.second.nGeneration_errs.has_value()) {
+      json_object_object_add(drive, "generation_errs", json_object_new_int(SizeTToInt32(item.second.nGeneration_errs.value())));
+    }
 
     json_object_array_add(children, drive);
   }
@@ -91,7 +119,7 @@ std::string GetJSONBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeS
   return json_output_single_line;
 }
 
-void LogStatsToSyslogMountStats(const cMountStats& mountStats)
+bool LogStatsToSyslogMountStats(const cMountStats& mountStats)
 {
   const std::string json_output_single_line = GetJSONMountStats(mountStats);
 
@@ -99,16 +127,17 @@ void LogStatsToSyslogMountStats(const cMountStats& mountStats)
 
   if (json_output_single_line.empty()) {
     syslog(LOG_ERR, "Error creating JSON");
-    return;
+    return false;
   }
 
   syslog(LOG_INFO, "Mount %s drive stats json @cee: %s", mountStats.sMountPoint.c_str(), json_output_single_line.c_str());
+  return true;
 }
 
-void LogStatsToSyslogMountStatsAndBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats)
+bool LogStatsToSyslogMountStatsAndBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeStats& btrfsVolumeStats)
 {
   // Log the regular mount stats
-  LogStatsToSyslogMountStats(mountStats);
+  const bool log_mount_result = LogStatsToSyslogMountStats(mountStats);
 
   // Now log the BTRFS stats
   const std::string json_output_single_line = GetJSONBtrfsStats(mountStats, btrfsVolumeStats);
@@ -117,10 +146,11 @@ void LogStatsToSyslogMountStatsAndBtrfsStats(const cMountStats& mountStats, cons
 
   if (json_output_single_line.empty()) {
     syslog(LOG_ERR, "Error creating JSON");
-    return;
+    return false;
   }
 
   syslog(LOG_INFO, "Mount %s btrfs stats json @cee: %s", mountStats.sMountPoint.c_str(), json_output_single_line.c_str());
+  return log_mount_result;
 }
 
 }
