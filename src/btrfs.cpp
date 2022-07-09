@@ -38,6 +38,10 @@ bool ParseBtrfsVolumeDeviceStats(std::string_view view, const std::vector<std::s
 {
   btrfsVolumeStats.mapDrivePathToBtrfsDriveStats.clear();
 
+  for (auto& drive : drivePaths) {
+    btrfsVolumeStats.mapDrivePathToBtrfsDriveStats[drive] = cBtrfsDriveStats();
+  }
+
   if (view.empty()) {
     return false;
   }
