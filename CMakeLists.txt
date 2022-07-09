@@ -82,15 +82,11 @@ SET(STANDARD_LIBRARIES
   json-c
   m
 )
-SET(XDG_LIBRARIES
-  xdg-basedir
-)
 ENDIF()
 
 # Some of the libraries have different names than their Find*.cmake name
 SET(LIBRARIES_LINKED
   ${STANDARD_LIBRARIES}
-  ${XDG_LIBRARIES}
 )
 
 FOREACH(LIBRARY_FILE ${LIBRARIES})
