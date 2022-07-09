@@ -12,12 +12,12 @@ Install dependencies:
 
 Ubuntu:
 ```bash
-sudo apt install gcc-c++ cmake json-c-dev
+sudo apt install gcc-c++ cmake json-c-dev gtest-dev
 ```
 
 Fedora:
 ```bash
-sudo dnf install gcc-c++ cmake json-c-devel
+sudo dnf install gcc-c++ cmake json-c-devel gtest-devel
 ```
 
 Build:
