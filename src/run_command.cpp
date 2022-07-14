@@ -2,14 +2,13 @@
 #include <iostream>
 #include <fstream>
 #include <filesystem>
-#include <vector>
-
 #include <span>
+#include <sstream>
 #include <vector>
-#include <string>
-#include <optional>
 
+#include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -24,19 +23,13 @@ class cPipeIn
 public:
   cPipeIn() {}
 
-  /** Start the external program
-      @return Returns the exit code of the external program
-  */
   bool Run(const std::string& executable, const std::vector<std::string>& arguments, int& out_result);
 
-    /** Access the stdout output of the program */
-  std::string_view get_stdout_txt() const { return std::string_view(reinterpret_cast<char const*>(m_stdout_vec.data()), m_stdout_vec.size()); }
-
-  /** Access the stderr output of the program */
-  std::string_view get_stderr_txt() const { return {reinterpret_cast<char const*>(m_stderr_vec.data()), m_stderr_vec.size()}; }
+  std::string_view GetStdOutText() const { return std::string_view(reinterpret_cast<char const*>(m_stdout_vec.data()), m_stdout_vec.size()); }
+  std::string_view GetStdErrText() const { return { reinterpret_cast<char const*>(m_stderr_vec.data()), m_stderr_vec.size()}; }
 
 private:
-  bool process_io(int stdout_fd, int stderr_fd);
+  bool ReadOutput(int stdout_fd, int stderr_fd);
 
   std::vector<uint8_t> m_stdout_vec;
   std::vector<uint8_t> m_stderr_vec;
@@ -45,24 +38,6 @@ private:
   cPipeIn(const cPipeIn&) = delete;
   cPipeIn& operator=(const cPipeIn&) = delete;
 };
-
-}
-
-
-
-#include <sstream>
-#include <iostream>
-#include <errno.h>
-#include <sstream>
-#include <stdexcept>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-namespace lumberjill {
 
 bool cPipeIn::Run(const std::string& executable, const std::vector<std::string>& arguments, int& out_result)
 {
@@ -123,10 +98,10 @@ bool cPipeIn::Run(const std::string& executable, const std::vector<std::string>&
 
     int error_code = errno;
 
-    // FIXME: this ain't proper, need to exit(1) on failure and signal error to parent somehow
+    // TODO: We need to call exit(1) on failure and signal error to parent somehow
 
     // execvp() only returns on failure
-    std::cerr << executable << ": " << strerror(error_code) << std::endl;
+    std::cerr<<"cPipeIn::Run execvp Error: "<<strerror(error_code)<<std::endl;
     _exit(EXIT_FAILURE);
   }
   else // if (pid > 0)
@@ -138,7 +113,7 @@ bool cPipeIn::Run(const std::string& executable, const std::vector<std::string>&
     // We don't write any data to stdin, so just close it
     close(stdin_fd[1]);
 
-    if (!process_io(stdout_fd[0], stderr_fd[0])) {
+    if (!ReadOutput(stdout_fd[0], stderr_fd[0])) {
       int child_status = 0;
       waitpid(pid, &child_status, 0);
       return false;
@@ -153,15 +128,14 @@ bool cPipeIn::Run(const std::string& executable, const std::vector<std::string>&
   return true;
 }
 
-bool cPipeIn::process_io(int stdout_fd, int stderr_fd)
+bool cPipeIn::ReadOutput(int stdout_fd, int stderr_fd)
 {
   char buffer[2048];
 
-  // start reading from stdout/stderr
+  // Check if there is anything to read from stdout/stderr
   bool stdout_eof = false;
   bool stderr_eof = false;
-  while(!(stdout_eof && stderr_eof))
-  {
+  while (!(stdout_eof && stderr_eof)) {
     bool stdout_ready = false;
     bool stderr_ready = false;
 
@@ -177,22 +151,16 @@ bool cPipeIn::process_io(int stdout_fd, int stderr_fd)
       }
     } else if (!stderr_eof) {
       result = PollRead(infinite_timeout_ms, stderr_fd, stderr_ready);
-    } else {
-      std::cout<<"d"<<std::endl;
     }
 
     if (result == POLL_READ_RESULT::ERROR) {
       close(stdout_fd);
       close(stderr_fd);
 
-      std::cerr<<"cPipeIn::process_io(): select() failure: "<<strerror(errno)<<std::endl;
+      std::cerr<<"cPipeIn::ReadOutput poll error: "<<strerror(errno)<<std::endl;
       return false;
     }
-    else if (result == POLL_READ_RESULT::TIMED_OUT)
-    {
-      std::cerr << "select() returned without results, this shouldn't happen" << std::endl;
-    }
-    else
+    else if (result == POLL_READ_RESULT::DATA_READY)
     {
       if (stdout_ready)
       {
@@ -203,7 +171,7 @@ bool cPipeIn::process_io(int stdout_fd, int stderr_fd)
           close(stdout_fd);
           close(stderr_fd);
 
-          std::cerr<<"cPipeIn::process_io(): stdout read failure: "<<strerror(errno)<<std::endl;
+          std::cerr<<"cPipeIn::ReadOutput stdout read Error: "<<strerror(errno)<<std::endl;
           return false;
         }
         else if (len > 0) // ok
@@ -226,7 +194,7 @@ bool cPipeIn::process_io(int stdout_fd, int stderr_fd)
           close(stdout_fd);
           close(stderr_fd);
 
-          std::cerr<<"cPipeIn::process_io(): stderr read failure: "<<strerror(errno)<<std::endl;
+          std::cerr<<"cPipeIn::ReadOutput stderr read Error: "<<strerror(errno)<<std::endl;
           return false;
         }
         else if (len > 0) // ok
@@ -259,8 +227,8 @@ bool RunCommand(const std::string& executable, const std::vector<std::string>& a
   int result = -1;
   const bool success = pipe.Run(executable, arguments, result);
 
-  out_standard = pipe.get_stdout_txt();
-  out_error = pipe.get_stderr_txt();
+  out_standard = pipe.GetStdOutText();
+  out_error = pipe.GetStdErrText();
 
   //std::cout<<"RunCommand stdout: \""<<out_standard<<"\""<<std::endl;
   //std::cout<<"RunCommand stderr: \""<<out_error<<"\""<<std::endl;
