@@ -220,6 +220,7 @@ bool RunCommand(const std::string& executable, const std::vector<std::string>& a
 
   // We only allow absolute executable paths
   if (!IsFilePathAbsolute(executable)) {
+    syslog("RunCommand Executable \"%s\" not found", executable.c_str());
     return false;
   }
 
