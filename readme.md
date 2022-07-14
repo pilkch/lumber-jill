@@ -55,23 +55,23 @@ Create a cron job to run it once per day:
 ```bash
 sudo crontab -e
 ```
-2) Add an entry to run lumber-jill [once per day at 3am](https://crontab.guru/#0_3_*_*_*):
+2) Add an entry to crontab to run lumber-jill [once per day at 3am](https://crontab.guru/#0_3_*_*_*):
 ```bash
-0 3 * * * /usr/local/bin/lumber-jill
+0 3 * * * /usr/bin/lumber-jill
 ```
 3) Check it was added:
 ```bash
-crontab -l
+sudo crontab -l
 ```
 
 ## Removal
 
-Remove crontab file:
+Remove the lumber-jill entry from crontab:
 ```bash
-crontab -r
+sudo crontab -e
 ```
 
-Remove binary and settings file:
+Remove the executable and settings files:
 ```bash
 sudo rm /usr/bin/lumber-jill /root/.config/lumber-jill/settings.json
 ```
