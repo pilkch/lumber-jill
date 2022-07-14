@@ -99,7 +99,7 @@ bool GetDriveSmartControlData(const std::string& sDevicePath, cSmartCtlStats& sm
   // Run "smartctl -A /dev/sdf"
   std::string out_standard;
   std::string out_error;
-  const bool result = RunCommand("/usr/bin/smartctl", std::vector<std::string> { "-A", sDevicePath }, out_standard, out_error);
+  const bool result = RunCommand("/usr/sbin/smartctl", std::vector<std::string> { "-A", sDevicePath }, out_standard, out_error);
   if (!result) {
     return false;
   }

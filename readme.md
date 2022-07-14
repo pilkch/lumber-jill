@@ -1,6 +1,6 @@
 ## About
 
-This project is a monitoring application for btrfs file systems.  Basically it is run by crontab at regular intervals (Say, once per day), it calls some standard Linux applications such as `smartctl`, `df`, and `btrfs device stats`, parses the output and prints some basic stats and whether the drive is happy or not to syslog.  You can then read the logs on the machine or read them after they are pushed to a central logging server.
+This project is a monitoring application for btrfs file systems.  Basically it is run by crontab at regular intervals (Say, once per day), it calls some standard Linux applications such as `smartctl` and `btrfs device stats`, parses the output and prints some basic stats and whether the drive is happy or not to syslog.  You can then read the logs on the machine or read them after they are pushed to a central logging server.
 
 ## Requirements
 
