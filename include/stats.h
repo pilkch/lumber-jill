@@ -24,6 +24,7 @@ class cDriveStats {
 public:
   cDriveStats() : bIsPresent(true) {}
 
+  std::string sName;
   std::string sDevicePath;
 
   bool bIsPresent;
@@ -60,6 +61,8 @@ public:
     nCorruption_errs.reset();
     nGeneration_errs.reset();
   }
+
+  std::string sName;
 
   std::optional<size_t> nWrite_io_errs;
   std::optional<size_t> nRead_io_errs;

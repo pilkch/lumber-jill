@@ -44,7 +44,8 @@ std::string GetJSONMountStats(const cMountStats& mountStats)
 
   for (auto& item : mountStats.mapDrivePathToDriveStats) {
     json_object* drive = json_object_new_object();
-    json_object_object_add(drive, "device", json_object_new_string(item.first.c_str()));
+    json_object_object_add(drive, "name", json_object_new_string(item.second.sName.c_str()));
+    json_object_object_add(drive, "path", json_object_new_string(item.first.c_str()));
     json_object_object_add(drive, "present", json_object_new_boolean(item.second.bIsPresent));
 
     if (item.second.smartCtlStats.nRaw_Read_Error_Rate.has_value()) {
@@ -87,7 +88,8 @@ std::string GetJSONBtrfsStats(const cMountStats& mountStats, const cBtrfsVolumeS
 
   for (auto& item : btrfsVolumeStats.mapDrivePathToBtrfsDriveStats) {
     json_object* drive = json_object_new_object();
-    json_object_object_add(drive, "device", json_object_new_string(item.first.c_str()));
+    json_object_object_add(drive, "name", json_object_new_string(item.second.sName.c_str()));
+    json_object_object_add(drive, "path", json_object_new_string(item.first.c_str()));
 
     if (item.second.nWrite_io_errs.has_value()) {
       json_object_object_add(drive, "write_io_errs", json_object_new_int(SizeTToInt32(item.second.nWrite_io_errs.value())));

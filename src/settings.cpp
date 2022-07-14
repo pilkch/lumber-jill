@@ -137,25 +137,63 @@ bool ParseJSONSettings(json_object& jobj, std::vector<cGroup>& groups)
           }
 
           enum json_type device_type = json_object_get_type(device_obj);
-          if (device_type != json_type_string) {
+          if (device_type != json_type_object) {
             return false;
           }
 
-          const char* value = json_object_get_string(device_obj);
-          if (value == nullptr) {
-            return false;
+          cDevice device;
+
+          {
+            struct json_object* name_obj = json_object_object_get(device_obj, "name");
+            if (name_obj == nullptr) {
+              return false;
+            }
+
+            enum json_type name_type = json_object_get_type(name_obj);
+            if (name_type != json_type_string) {
+              return false;
+            }
+
+            const char* value = json_object_get_string(name_obj);
+            if (value == nullptr) {
+              return false;
+            }
+
+            device.sName = value;
+            if (device.sName.empty()) {
+              std::cerr<<"lumber-jill Invalid device name \""<<device.sName<<"\""<<std::endl;
+              syslog(LOG_ERR, "lumber-jill Invalid device name \"%s\"", device.sName.c_str());
+              return false;
+            }
           }
 
-          const std::string sDeviceValue(value);
-          if (sDeviceValue.empty()) {
-            std::cerr<<"lumber-jill Invalid device \""<<sDeviceValue<<"\""<<std::endl;
-            syslog(LOG_ERR, "lumber-jill Invalid device \"%s\"", sDeviceValue.c_str());
-            return false;
+          {
+            struct json_object* path_obj = json_object_object_get(device_obj, "path");
+            if (path_obj == nullptr) {
+              return false;
+            }
+
+            enum json_type path_type = json_object_get_type(path_obj);
+            if (path_type != json_type_string) {
+              return false;
+            }
+
+            const char* value = json_object_get_string(path_obj);
+            if (value == nullptr) {
+              return false;
+            }
+
+            device.sPath = value;
+            if (device.sPath.empty()) {
+              std::cerr<<"lumber-jill Invalid device path \""<<device.sPath<<"\""<<std::endl;
+              syslog(LOG_ERR, "lumber-jill Invalid device path \"%s\"", device.sPath.c_str());
+              return false;
+            }
           }
 
-          group.devices.push_back(sDeviceValue);
+          group.devices.push_back(device);
 
-          //std::cout<<"lumber-jill Group device found \""<<sDeviceValue<<"\""<<std::endl;
+          //std::cout<<"lumber-jill Group device found \""<<device.sName<<"\", \""<<device.sPath<<"\""<<std::endl;
         }
       }
 
@@ -207,7 +245,9 @@ bool cSettings::IsValid() const
 
     // Check each device is valid
     for (auto& device : group.devices) {
-      if (device.empty()) return false;
+      // Each device needs a name and a path
+      if (device.sName.empty()) return false;
+      else if (device.sPath.empty()) return false;
     }
   }
 

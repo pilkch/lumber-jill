@@ -3,22 +3,22 @@
     "groups": [
       {
         "type": "single",
-        "mount_point": "/",
+        "mount_point": "/"
       },
       {
         "type": "single",
         "devices": [
-          "/dev/sdg"
+          { "name": "USB", "path": "/dev/sdg" }
         ]
       },
       {
         "mount_point": "/data1",
         "devices": [
-          "/dev/sdb",
-          "/dev/sdc",
-          "/dev/sdd",
-          "/dev/sde",
-          "/dev/sdf"
+          { "name": "BTRFS 1", "path": "/dev/sdb" },
+          { "name": "BTRFS 2", "path": "/dev/sdc" },
+          { "name": "BTRFS 3", "path": "/dev/sdd" },
+          { "name": "BTRFS 4", "path": "/dev/sde" },
+          { "name": "BTRFS 5", "path": "/dev/sdf" }
         ]
       }
     ]

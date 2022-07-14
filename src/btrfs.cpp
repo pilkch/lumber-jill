@@ -34,20 +34,22 @@ namespace btrfs {
 //[/dev/sdb].corruption_errs  0
 //[/dev/sdb].generation_errs  0
 
-bool ParseBtrfsVolumeDeviceStats(std::string_view view, const std::vector<std::string>& drivePaths, cBtrfsVolumeStats& btrfsVolumeStats)
+bool ParseBtrfsVolumeDeviceStats(std::string_view view, const std::vector<cDevice>& devices, cBtrfsVolumeStats& btrfsVolumeStats)
 {
   btrfsVolumeStats.mapDrivePathToBtrfsDriveStats.clear();
-
-  for (auto& drive : drivePaths) {
-    btrfsVolumeStats.mapDrivePathToBtrfsDriveStats[drive] = cBtrfsDriveStats();
-  }
 
   if (view.empty()) {
     return false;
   }
 
-  if (drivePaths.empty()) {
+  if (devices.empty()) {
     return false;
+  }
+
+  for (auto& device : devices) {
+    cBtrfsDriveStats btrfsDriveStats;
+    btrfsDriveStats.sName = device.sName;
+    btrfsVolumeStats.mapDrivePathToBtrfsDriveStats[device.sPath] = btrfsDriveStats;
   }
 
   while (!view.empty()) {
@@ -118,7 +120,7 @@ bool ParseBtrfsVolumeDeviceStats(std::string_view view, const std::vector<std::s
 }
 
 // Runs "btrfs device stats /data1" to collect BTRFS stats for a volume
-bool GetBtrfsVolumeDeviceStats(const std::string& sMountPoint, const std::vector<std::string>& drivePaths, cBtrfsVolumeStats& btrfsVolumeStats)
+bool GetBtrfsVolumeDeviceStats(const std::string& sMountPoint, const std::vector<cDevice>& devices, cBtrfsVolumeStats& btrfsVolumeStats)
 {
   btrfsVolumeStats.mapDrivePathToBtrfsDriveStats.clear();
 
@@ -131,7 +133,7 @@ bool GetBtrfsVolumeDeviceStats(const std::string& sMountPoint, const std::vector
   }
 
   //  Parse the output
-  return ParseBtrfsVolumeDeviceStats(out_standard, drivePaths, btrfsVolumeStats);
+  return ParseBtrfsVolumeDeviceStats(out_standard, devices, btrfsVolumeStats);
 }
 
 }

@@ -36,9 +36,9 @@ TEST(ParseCommand, TestParseBtrfsOutput)
   // Empty string should fail
   {
     const std::string sCommandOutput = "";
-    const std::vector<std::string> drivePaths;
+    const std::vector<lumberjill::cDevice> devices;
     lumberjill::cBtrfsVolumeStats btrfsVolumeStats;
-    EXPECT_FALSE(lumberjill::btrfs::ParseBtrfsVolumeDeviceStats(sCommandOutput, drivePaths, btrfsVolumeStats));
+    EXPECT_FALSE(lumberjill::btrfs::ParseBtrfsVolumeDeviceStats(sCommandOutput, devices, btrfsVolumeStats));
 
     EXPECT_EQ(0, btrfsVolumeStats.mapDrivePathToBtrfsDriveStats.size());
   }
@@ -49,15 +49,30 @@ TEST(ParseCommand, TestParseBtrfsOutput)
 
     std::string sCommandOutput;
     ASSERT_TRUE(lumberjill::ReadFileIntoString("test/data/btrfs_device_stats_output.txt", nMaxFileSizeBytes, sCommandOutput));
-    const std::vector<std::string> drivePaths = {
-      "/dev/sdb",
-      "/dev/sdc",
-      "/dev/sdd",
-      "/dev/sde",
-      "/dev/sdf"
-    };
+
+    std::vector<lumberjill::cDevice> devices;
+
+    {
+      lumberjill::cDevice device;
+      device.sName = "BTRFS A";
+      device.sPath = "/dev/sdb";
+      devices.push_back(device);
+      device.sName = "BTRFS B";
+      device.sPath = "/dev/sdc";
+      devices.push_back(device);
+      device.sName = "BTRFS C";
+      device.sPath = "/dev/sdd";
+      devices.push_back(device);
+      device.sName = "BTRFS D";
+      device.sPath = "/dev/sde";
+      devices.push_back(device);
+      device.sName = "BTRFS E";
+      device.sPath = "/dev/sdf";
+      devices.push_back(device);
+    }
+
     lumberjill::cBtrfsVolumeStats btrfsVolumeStats;
-    EXPECT_TRUE(lumberjill::btrfs::ParseBtrfsVolumeDeviceStats(sCommandOutput, drivePaths, btrfsVolumeStats));
+    EXPECT_TRUE(lumberjill::btrfs::ParseBtrfsVolumeDeviceStats(sCommandOutput, devices, btrfsVolumeStats));
 
     EXPECT_EQ(5, btrfsVolumeStats.mapDrivePathToBtrfsDriveStats.size());
 

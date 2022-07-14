@@ -5,25 +5,25 @@
         "type": "single",
         "mount_point": "/",
         "devices": [
-          "/dev/sda",
+          { "name": "OS", "path": "/dev/sda" }
         ]
       },
       {
         "type": "single",
         "mount_point": "/mnt/externalusb",
         "devices": [
-          "/dev/sdg"
+          { "name": "External USB", "path": "/dev/sdg" }
         ]
       },
       {
         "type": "btrfs",
         "mount_point": "/data1",
         "devices": [
-          "/dev/sdb",
-          "/dev/sdc",
-          "/dev/sdd",
-          "/dev/sde",
-          "/dev/sdf"
+          { "name": "BTRFS ata-ST6000VN001-2BB186_ZR10KNTX", "path": "/dev/sdb" },
+          { "name": "BTRFS ata-ST4000VN008-2DR166_ZGY9A4L9", "path": "/dev/sdc" },
+          { "name": "BTRFS ata-WDC_WD2002FAEX-007BA0_WD-WCAY01084808", "path": "/dev/sdd" },
+          { "name": "BTRFS ata-ST4000VN008-2DR166_ZGJTEFGQ", "path": "/dev/sde" },
+          { "name": "BTRFS ata-WDC_WD10EZEX-21M2NA0_WCC3F3022307", "path": "/dev/sdf" }
         ]
       }
     ]

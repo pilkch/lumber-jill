@@ -10,13 +10,19 @@ enum class GROUP_TYPE {
   BTRFS,
 };
 
+class cDevice {
+public:
+  std::string sName;
+  std::string sPath;
+};
+
 class cGroup {
 public:
   cGroup() : type(GROUP_TYPE::SINGLE) {}
 
   GROUP_TYPE type;
   std::string sMountPoint;
-  std::vector<std::string> devices;
+  std::vector<cDevice> devices;
 };
 
 class cSettings {

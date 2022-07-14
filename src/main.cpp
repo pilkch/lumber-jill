@@ -63,6 +63,8 @@ void PrintUsage()
 
 bool GetMountTotalAndFreeSpace(const std::string& sMountPoint, cMountStats& outStats)
 {
+  outStats.ClearSpaceStats();
+
   // Something similar to "df -h /data1"
   // https://stackoverflow.com/questions/1449055/disk-space-used-free-total-how-do-i-get-this-in-c
 
@@ -95,13 +97,14 @@ bool QueryAndLogGroups(const cSettings& settings)
     GetMountTotalAndFreeSpace(group.sMountPoint, mountStats);
 
     // Now check each drive
-    for (auto& sDevicePath : group.devices) {
+    for (auto& device : group.devices) {
       cDriveStats deviceStats;
-      deviceStats.bIsPresent = IsDrivePresent(sDevicePath);
+      deviceStats.sName = device.sName;
+      deviceStats.bIsPresent = IsDrivePresent(device.sPath);
 
-      smartctl::GetDriveSmartControlData(sDevicePath, deviceStats.smartCtlStats);
+      smartctl::GetDriveSmartControlData(device.sPath, deviceStats.smartCtlStats);
 
-      mountStats.mapDrivePathToDriveStats[sDevicePath] = deviceStats;
+      mountStats.mapDrivePathToDriveStats[device.sPath] = deviceStats;
     }
 
     // Log output
