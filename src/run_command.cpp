@@ -9,6 +9,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <syslog.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -220,7 +221,7 @@ bool RunCommand(const std::string& executable, const std::vector<std::string>& a
 
   // We only allow absolute executable paths
   if (!IsFilePathAbsolute(executable)) {
-    syslog("RunCommand Executable \"%s\" not found", executable.c_str());
+    syslog(LOG_ERR, "RunCommand Executable \"%s\" not found", executable.c_str());
     return false;
   }
 
